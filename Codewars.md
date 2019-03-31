@@ -244,3 +244,227 @@ function high(x){
     })[0]; // return the first item
 }
 ```
+
+## P7 Human Redable Time
+
+### Task
+
+Write a function, which takes a non-negative integer (seconds) as input and returns the time in a human-readable format (HH:MM:SS)
+
+- HH = hours, padded to 2 digits, range: 00 - 99
+- MM = minutes, padded to 2 digits, range: 00 - 59
+- SS = seconds, padded to 2 digits, range: 00 - 59
+
+The maximum time never exceeds 359999 (99:59:59)
+
+### My Solution
+
+```js
+function humanReadable(seconds) {
+  // compute the hours and minutes based on the seconds value
+  let hours = 0, minutes = 0;
+  while(seconds >= 3600) {
+    seconds -= 3600;
+    hours += 1;
+  }
+  while(seconds >= 60) {
+    seconds -= 60;
+    minutes += 1;
+  }
+
+  // zero-pad the values
+  h = hours > 10 ? hours : `0${hours}`;
+  m = minutes > 10 ? minutes : `0${minutes}`;
+  s = seconds > 10 ? seconds : `0${seconds}`;
+  return `${h}:${m}:${s}`;
+}
+```
+
+### Tags
+
+time, ternary operator
+
+### Much Better Approach
+
+Computing the number of hours and minutes through basic math:
+
+- the hours by dividing the number of seconds by 3600 and retrieving the integer (non decimal value)
+
+  ```js
+  hours = parseInt(seconds / 3600);
+  ```
+
+- the minutes by first dividing by 60 (accounting for the hours) and considering what is left through the modulo operator
+
+  ```js
+  minutes = parseInt(seconds / 60 % 60);
+  ```
+
+  Considering for instance a value of `3700` seconds:
+
+  - `seconds / 60` returns `61.666`;
+
+  - the moduloo `% 60` identifies `1.6`;
+
+  - `parseInt` will consider `1`, the precise number of seconds.
+
+- the number of seconds by using the modulo operator on the number of seconds itself
+
+  ```js
+  seconds = seconds % 60;
+  ```
+
+  Considering the previous `3700` value, it would identify `40`.
+
+## P8 Create Phone Numbers
+
+### Task
+
+Write a function that accepts an array of 10 integers (between 0 and 9), that returns a string of those numbers in the form of a phone number.
+
+Example:
+
+```js
+createPhoneNumber([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) // => returns "(123) 456-7890"
+```
+
+### My Solution
+
+```js
+function createPhoneNumber(numbers){
+  // target the numbers in a three-three-four pattern
+  return numbers.join('').replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+}
+```
+
+### Tags
+
+regex, replace
+
+## P9 Simple Encryption #1 - Alternating Split
+
+Take every 2nd char from the string, then the other chars, that are not every 2nd char, and concat them as new String.
+Do this n times.
+
+```js
+function encrypt(text, n) {
+
+}
+```
+
+Example:
+
+```js
+encrypt("This is a test!", 1); // "hsi  etTi sats!"
+encrypt("This is a test!", 2); // "hsi  etTi sats!" -> "s eT ashi tist!"
+```
+
+Write two methods:
+
+```js
+function encrypt(text, n)
+function decrypt(encryptedText, n)
+```
+
+For both methods:
+
+- If the input-string is `null` or empty return exactly this value!
+
+- If `n` is `<= 0` then return the input text.
+
+### My Solution
+
+```js
+function encrypt(text, n) {
+  // consider the foreseen edge cases
+  if(!text) return text
+  if(n<=0) return text
+
+  // text is not-null, n is greater than 0
+
+  // initialize two variables for the sections of the encrypted string
+  // splitB: those characters which need to be appended
+  const splitA = [];
+  const splitB = [];
+  // use a for of loop with array.entries() applied on the letters of the input string
+  // this to access both the letter and the index
+  for(const [index, value] of [...text].entries()) {
+    if(index % 2 == 0) {
+      splitB.push(value);
+    } else {
+      splitA.push(value);
+    }
+  }
+  // recursion: call the encrypt function with n-1. passing the encrypted string
+  return encrypt([...splitA, ...splitB].join(''), n - 1);
+}
+
+function decrypt(encryptedText, n) {
+  // consider the foreseen edge cases
+  if(!encryptedText) return encryptedText
+  if(n<=0) return encryptedText
+
+  // encryptedText is not-null, n is greater than 0
+  // consider the length of the string
+  const { length } = encryptedText;
+  // consider the halfway point in the string flooring the value
+  const halfwayPoint = Math.floor(length / 2);
+  // divide encryptedText in two arrays, considering the halves of the string
+  const splitA = [...encryptedText].slice(0, halfwayPoint);
+  const splitB = [...encryptedText].slice(halfwayPoint);
+
+  // build a string by alternating the letters from the second and first array
+  const decrypted = [];
+  for(let i = 0; i < length; i+=1) {
+    if(i % 2 === 0) {
+      decrypted.push(splitB.shift());
+    } else {
+      decrypted.push(splitA.shift());
+    }
+  }
+  // recursion: return the decrypted string with n-1
+  return decrypt(decrypted.join(''), n - 1);
+}
+```
+
+### Notes
+
+Had a bit of an issue considering the algorithm, but it is perhaps better understood by example:
+
+```js
+encrypt("This is a test!", 1); // "hsi  etTi sats!"
+```
+
+The second characters are (apparently): `T`, `i`, ` `, `s`, `a`, `t`, `s`, `!`. Considering the index: 0th, 2nd, and so forth. Take such items and attach them at the end of the string.
+
+While challenging, understanding the algorithm makes the encryption part straightforward to implement:
+
+- consider the specific characters in a separate array
+
+- concatenate these characters to the rest of the string
+
+- return the string.
+
+To allow for multiple rounds of encryption, it is actually possible to return the `encrypt` function with the new string and `n-1`. Given the condition:
+
+```js
+if(n<=0) return text
+```
+
+As soon as `n` hits 0, the finally encrypted string is returned.
+
+Decrypting the string is a tad more challenging:
+
+- consider the length of the string.
+
+- consider half the length of the string, flooring the value (this because of 0-based indexing).
+
+- split the string in the two halves.
+
+- alternate between the letters of the second and first half.
+
+To allow for recursion, proceed as with the encryption logic to return the same function with `n-1`. Alternating between the letters is actually an intriguing operation, which is implemented by alternatively removing the first item of one and the other arrays.
+
+### Tags
+
+recursion, encryption, for of, entries, spread, shift
