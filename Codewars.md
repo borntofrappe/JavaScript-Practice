@@ -2,7 +2,7 @@
 
 > problems, solutions and notes from [codewars](https://www.codewars.com).
 
-## P1: A Pile of cubes
+## P1 A Pile of cubes
 
 ### Task
 
@@ -468,3 +468,338 @@ To allow for recursion, proceed as with the encryption logic to return the same 
 ### Tags
 
 recursion, encryption, for of, entries, spread, shift
+
+## P10 Descending Order
+
+### Task
+
+Your task is to make a function that can take any non-negative integer as a argument and return it with its digits in descending order. Essentially, rearrange the digits to create the highest possible number.
+
+Example:
+
+Input: 21445 - Output: 54421
+
+### My Solution
+
+function descendingOrder(n){
+  const highestValue =  n
+    // change to string
+    .toString()
+    // create an array
+    .split('')
+    // sort in descending order
+    // ! the operator > computes the operation on the characters as if they were numbers
+    .sort((a, b) => a > b ? -1 : 1)
+    // return the sorted series
+    .join('');
+
+    // return as integer
+    return Number.parseInt(highestValue, 10);
+}
+
+
+
+## P11 Two to One
+
+### Task
+
+Take 2 strings s1 and s2 including only letters from a to z. Return a new sorted string, the longest possible, containing distinct letters (each taken only once, from either s1 or s2).
+
+### My Solution
+
+function longest(s1, s2) {
+  // create a Set out of the concatenated strings
+  const set = new Set([...s1, ...s2]);
+  // return the set made into an array
+  return [...set]
+    // sorted alphabetically
+    // ! remember a is 97, b 98 and so forth
+    .sort((a, b) => a < b ? -1 : 1)
+    // as a string
+    .join('');
+}
+
+
+### Tags
+
+set, destructuring, sort, ternary operator
+
+
+## P12 Word a10n (abbreviation)
+
+### Task
+
+The word i18n is a common abbreviation of internationalization in the developer community, used instead of typing the whole word and trying to spell it correctly. Similarly, a11y is an abbreviation of accessibility.
+
+Write a function that takes a string and turns any and all "words" (see below) within that string of length 4 or greater into an abbreviation, following these rules:
+
+A "word" is a sequence of alphabetical characters. By this definition, any other character like a space or hyphen (eg. "elephant-ride") will split up a series of letters into two words (eg. "elephant" and "ride").
+The abbreviated version of the word should have the first letter, then the number of removed characters, then the last letter (eg. "elephant ride" => "e6t r2e").
+
+### My Solution
+
+```js
+function abbreviate(string) {
+  // array of words
+  const words = string.split(' ');
+  // map through the words returning the first and last letter separated by the number of letters in between
+  const abbr = words.map(word => `${word[0]}${word.length - 2}${word[word.length - 1]}`);
+
+  // return the abbreviated words
+  return abbr.join(' ');
+}
+```
+
+In a single line.
+
+```js
+function abbreviate(string) {
+  return string
+    // split into an array of words
+    .split(' ')
+    // map through the words returning the first and last letter separated by the number of letters in between
+    .map(word => `${word[0]}${word.length - 2}${word[word.length - 1]}`)
+    // return as a string
+    .join(' ');
+}
+```
+
+Accounting for separators which can be anything but a character. (and fulfilling the condition that the word must be 4 or more characters long)<>
+
+```js
+function abbreviate(string) {
+  // build an array of the possible separators (anything but a character)
+  const separators = string.match(/\W/g);
+
+  // create an array with the abbreviated words
+  const abbr = string
+    // split into an array of words
+    // ! based on the same regex making up the separators
+    .split(/\W/g)
+    // map through the words returning the first and last letter separated by the number of letters in between
+    // ! if the word is 4 characters or more long
+    .map((word) => word.length >= 4 ? `${word[0]}${word.length - 2}${word[word.length - 1]}` : word);
+
+  // if there are separators, map through the abbreviated words and include the separators for all but the last words
+  // in order
+  return separators ? abbr
+                      .map((word, index) => (index < abbr.length - 1) ? `${word}${separators[index]}` : `${word}`)
+                      // return as a string
+                      .join('')
+                    // if there are no separators return the single word
+                    :
+                      abbr.join('');
+}
+```
+
+### Much Better Solution
+
+Find those words which are four or more characters long and using the regex function `replace` create the desired abbreviated version.
+
+```js
+var find = /[a-z]{4,}/gi;
+function replace(match) { return match[0] + (match.length - 2) + match[match.length - 1]; }
+
+function abbreviate(string) {
+  return string.replace(find, replace);
+}
+```
+
+Much clearner. Benefiting from the fact that `string.replace` accepts as a second argument a function which can operate on the matches sequentially.
+
+With backticks, the function can also be conveniently rewritten as follows:
+
+```js
+function abbreviate(string) {
+  return string.replace(/\w{4,}/gi, (match) => `${match[0]}${match.length - 2}${match[match.length - 1]}`);
+}
+```
+
+### Tags
+
+regex, replace
+
+## P13 Equal sides of an array
+
+### Task
+
+You are going to be given an array of integers. Your job is to take that array and find an index N where the sum of the integers to the left of N is equal to the sum of the integers to the right of N. If there is no index that would make this happen, return `-1`.
+
+Example
+
+Input: [1,2,3,4,3,2,1]
+Output: 3, given that [1,2,3] sum up to be the same as [3,2,1]
+
+Another example
+
+Input: [1,100,50,-51,1,1]
+Output: 1, given that [1] is the same as [50, -51, 1, 1] combined
+
+Another example, expressing how empty arrays in this exercise are equal to 0
+
+Input: [10, 10, -20]
+Output: 0, given that [10, 10, -20] sum up to 0 and you start with 0 when confronting the values.
+
+The `for of` loop seems to be appropriate, as it allows to easily break out of a loop when a condition is met. It also seems appropriate given that even with multiple combinations, the index to be returned is the first one which fulfills the requirement.
+
+### My Solution
+
+```js
+function findEvenIndex(arr)
+{
+  // initialize a variable in which to describe the index, if existing
+  let solution = -1;
+
+  // consider the sum of all items
+  const sumAll = arr.reduce((acc, curr) => acc += curr, 0);
+  // if 0, immediately update the solution
+  if(sumAll === 0) {
+    solution = sumAll;
+    // else consider the array one item at a time
+  } else {
+    // loop through the array considering both the index and the value of the array at each iteration
+    for(const [index, value] of arr.entries()) {
+      // consider the sum of all items after the index
+      const sumAfter = arr
+        .slice(index + 1)
+        .reduce((acc, curr) => acc += curr, 0);
+
+      // consider the sum of all items up to the index
+      const sumBefore = arr
+        .slice(0, index)
+        .reduce((acc, curr) => acc += curr, 0);
+
+      // if the two match update the solution and break out of the loop
+      if (sumAfter === sumBefore) {
+        solution = index;
+        break;
+      }
+    }
+  }
+
+  // return the solution (-1, 0 or the index depending on the logic)
+  return solution;
+}
+```
+
+### Notes
+
+I am not particularly happy with the conditional checking if the sum of all items is 0. Especially given how the reduce applied to an empty array:
+
+```js
+[].reduce((acc, curr) => acc += curr, 0);
+```
+
+Already returns 0. That being said, the issue is with the index itself. If the sum is already 0, it won't be picked up by slicing the array starting from the second item: `.slice(index + 1)`.
+
+### Tags
+
+reduce, for of
+
+## P14 Give me a diamond
+
+### Task
+
+You need to return a string that displays a diamond shape on the screen using asterisk ("*") characters. Please see provided test cases for exact output format.
+
+The shape that will be returned from print method resembles a diamond, where the number provided as input represents the number of *’s printed on the middle line. The line above and below will be centered and will have 2 less *’s than the middle line. This reduction by 2 *’s for each line continues until a line with a single * is printed at the top and bottom of the figure.
+
+Return `null` if input is even number or negative (as it is not possible to print diamond with even number or negative number).
+
+For instance with `n === 3`
+
+```text
+ *
+***
+ *
+```
+
+With `n === 5`
+
+```text
+  *
+ ***
+*****
+ ***
+  *
+```
+
+
+### My solution
+
+```js
+function diamond(n){
+  if (n % 2 === 0 || n < 0) return null;
+
+  // build the middle line
+  let diam = '*'.repeat(n);
+  // initialize a variable to keep track of the whitespace (1 for each new line)
+  let whitespace = 0;
+
+  // when n === 3, the last line will be 1 character long
+  while(n >= 3) {
+    // decrement by 2 the number of asterisks
+    n -= 2;
+    // increment by 1 the number of spaces
+    whitespace += 1;
+    // build the new line with the prescribed number of spaces and asterisks
+    const newLine = `${' '.repeat(whitespace)}${'*'.repeat(n)}`;
+    // wrap the previous structure in two new lines
+    diam = `${newLine}\n${diam}\n${newLine}`;
+  }
+  // return the diamond structure
+  return diam + '\n';
+}
+```
+
+### Notes
+
+Not really satisfied with the solution, especially the last concatenated new line. That one was necessary to pass the suite of tests set up by the challenge, but overall the structure can be improved. Perhaps using the recent functions of `padStart()` or `padEnd()`.
+
+### Tags
+
+repeat, while
+
+## P15 Baking Cakes
+
+### Task
+
+Write a function `cakes()`, which takes the recipe (object) and the available ingredients (also an object) and returns the maximum number of cakes it is possible can bake (integer). For simplicity there are no units for the amounts (e.g. 1 lb of flour or 200 g of sugar are simply 1 or 200). Ingredients that are not present in the objects, can be considered as 0.
+
+Example:
+
+Input: `cakes({flour: 500, sugar: 200, eggs: 1}, {flour: 1200, sugar: 1200, eggs: 5, milk: 200});`
+
+Output: `2`
+
+### My solution
+
+```js
+function cakes(recipe, available) {
+  // retrieve the ingredients from the recipe
+  const ingredients = Object.entries(recipe);
+  // map through the 2D array to compare the recipe's and available's ingredients
+  const possibleCakes = ingredients
+    // consider the ingredient and amount from the recipe
+    .map(([ingredient, amount]) => {
+      // detail if the ingredient exist in the available array
+      const isAvailable = available[ingredient];
+      // if available return the number of cakes hypothetically possible considering the single ingredient
+      if(isAvailable) {
+        const amountAvailable = Math.floor(available[ingredient] / amount);
+        return amountAvailable;
+      }
+      // else return 0
+      return 0;
+    })
+    // sort from smallest to biggest amount
+    .sort((a, b) => a > b ? 1 : -1);
+
+  // return the first number, describing the least number of cakes with the available ingredients
+  return possibleCakes[0];
+}
+```
+
+### Tags
+
+map, destructuring, object, entries
