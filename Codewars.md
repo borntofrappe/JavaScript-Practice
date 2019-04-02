@@ -803,3 +803,130 @@ function cakes(recipe, available) {
 ### Tags
 
 map, destructuring, object, entries
+
+## P16 Multiplication Table
+
+### Task
+
+Create a function that accepts dimensions, for rows and columns, as parameters in order to create a multiplication table sized according to the given measures. The return value of the function must be an array, and the numbers must be numbers, not strings.
+
+Example.
+
+```js
+multiplicationTable(3,3)
+/* multiplication table
+1 2 3
+2 4 6
+3 6 9
+
+actual output [[1,2,3],[2,4,6],[3,6,9]]
+*/
+```
+
+Each value on the table should be equal to the value of multiplying the number in its first row times the number in its first column. (like  6 being 3 * 2).
+
+### My Solution
+
+```js
+function multiplicationTable(row,col){
+  const table = [];
+  for(let i = 0; i < row; i+=1) {
+    table.push([]);
+    for(let j = 0; j < col; j+=1) {
+      table[i].push((i+1) * (j+1))
+    }
+  }
+  return table;
+}
+```
+
+### Tags
+
+table, for
+
+
+## P17 Count characters in your string
+
+The main idea is to count all the occuring characters(UTF-8) in string. If you have string like this aba then the result should be { 'a': 2, 'b': 1 }
+
+What if the string is empty ? Then the result should be empty object literal { }
+
+### My Solution
+
+```js
+function count (string) {
+  // return a single object
+  return [...string].reduce((acc, curr) => {
+  // acc refers to an object in which each letter is either added or counted (if already existed)
+  // curr refers to the current letter
+    if(acc[curr]) {
+      acc[curr] += 1;
+    } else {
+      acc[curr] = 1;
+    }
+    // return the updated object
+    return acc;
+  }, {});
+}
+```
+
+### Notes
+
+You could also solve the problem by splitting the word into an array and looping with a `forEach`, adding and enumerating the letters in a separate object.
+
+### Tags
+
+reduce, object
+
+## P18 Consecutive Powers
+
+### Task
+
+The number 89 is the first integer with more than one digit for which the following is true.
+
+```code
+89 = 8^1 + 9^2
+```
+
+The next number having this property is 135.
+
+```code
+135 = 1^1 + 3^2 + 5^3
+```
+
+We need a function to collect these numbers. A function receiving two integers `a`, `b` which defines the range [a, b] (inclusive) and returning a list of numbers which fulfills the described property.
+
+Another example:
+
+```code
+sumDigPow(1, 10) == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+Given that the first one-digit numbers all satisfy the condition that `x^1 = x`.
+
+### My Solution
+
+```js
+function sumDigPow(a, b) {
+  // array in which to store the solution
+  const solution = [];
+  // loop in the specified interval
+  for(let i = a; i < b; i+= 1) {
+    // consider an array of the integers making up the number
+    const digits = i.toString().split('').map(num => Number.parseInt(num, 10));
+    // consider the desired value (firstDigit ^ 1 + secondDigit ^ 2 + ...)
+    const pow = digits.reduce((acc, curr, index) => acc + Math.pow(curr, (index + 1)), 0);
+    // if the two match add the value to the solutions array
+    if(i === pow) {
+      solution.push(i);
+    }
+  }
+  // return the solution array
+  // if no match has been found, it is equal to an empty array
+  return solution;
+}
+```
+
+### Tags
+
+for, pow, reduce
