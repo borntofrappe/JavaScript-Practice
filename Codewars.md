@@ -930,3 +930,253 @@ function sumDigPow(a, b) {
 ### Tags
 
 for, pow, reduce
+
+## P19 Replace with Alphabeth Position
+
+### Task
+
+You are required to replace every letter in a string with its position in the alphabet.
+
+If anything in the text isn't a letter, ignore it and don't return it.
+
+### Solution
+
+```js
+function alphabetPosition(text) {
+  return text
+    // remove anything that is not a character
+    .replace(/[^a-z]/gi, '')
+    // replace each letter with their position relative to the letter 'a'
+    // ! concatenate a string with a space to have the value returned as a string, with a space
+    .replace(/[a-z]/gi, (match) => match.toLowerCase().charCodeAt() - 'a'.charCodeAt() + 1 + ' ')
+    // remove the last character making up an unnecessary space
+    .slice(0, -1);
+}
+```
+
+### Tags
+
+regex, replace, match
+
+## P20 Consonant Value
+
+Given a lowercase string that has alphabetic characters only and no spaces, return the highest value of consonant substrings.
+
+For example:
+
+```js
+solve("zodiacs") = 26
+```
+
+Because the consonant substrings are: z, d and cs with values z = 26, d = 4 and cs = 3 + 19 = 22. The highest is 26.
+
+Note that the value of a = 1, b = 2 ... z = 26, while vowels are a,e,i,o,u.
+
+### Solution
+
+```js
+function solve(s) {
+  return s
+    // split the string on the basis of vowels
+    .split(/[aeiou]/)
+    // map through the array of consonants computing for each set of consonants the value on the basis of the mentioned algorithm
+    // ! consonants might actually refer to a single letter
+    .map(consonants => [...consonants].reduce((acc, curr) => acc + (curr.charCodeAt() - 'a'.charCodeAt() + 1), 0))
+    // sort in descending order and return the first value
+    .sort((a, b) => a > b ? -1 : 1)[0];
+};
+```
+
+### Tags
+
+split, map, reduce, sort
+
+## P21 Ten Minute Walk
+
+###Task
+
+You live in the city of Cartesia where all roads are laid out in a perfect grid. You arrived ten minutes too early to an appointment, so you decided to take the opportunity to go for a short walk. The city provides its citizens with a Walk Generating App on their phones -- everytime you press the button it sends you an array of one-letter strings representing directions to walk (eg. ['n', 's', 'w', 'e']). You always walk only a single block in a direction and you know it takes you one minute to traverse one city block, so create a function that will return true if the walk the app gives you will take you exactly ten minutes (you don't want to be early or late!) and will, of course, return you to your starting point. Return false otherwise.
+
+Note: you will always receive a valid array containing a random assortment of direction letters ('n', 's', 'e', or 'w' only). It will never give you an empty array (that's not a walk, that's standing still!).
+
+### Solution
+
+```js
+function isValidWalk(walk) {
+  // create an object with the cardinal points, each depicting a direction in a made-up (x,y) coordinate system
+  const cardinals = {
+    n: [0, 1],
+    s: [0, -1],
+    w: [-1, 0],
+    e: [1, 0]
+  };
+  // if the array is more or less than 10 items long, immediately return false
+  if(walk.length !== 10) {
+    return false;
+  }
+  // loop through the walk array and compute the final (x, y) location considering each cardinal point
+  const finalPoint = walk.reduce((acc, curr) => {
+    // find the change in x and y
+    const [x, y] = cardinals[curr];
+    // update the accumulator's array
+    acc[0] += x;
+    acc[1] += y;
+    // remember to return the accumulator
+    return acc;
+  }, [0, 0]);
+  // if the final point is [0,0] return true
+  const [finalX, finalY] = finalPoint;
+  return (finalX === 0 && finalY === 0);
+}
+```
+
+### Tags
+
+reduce, object, array
+
+## P22 Autocomplete
+
+### Task
+
+The autocomplete function will take in an input string and a dictionary array and return the values from the dictionary that start with the input string. If there are more than 5 matches, restrict your output to the first 5 results. If there are no matches, return an empty array.
+
+Example
+
+```js
+autocomplete('ai', ['airplane','airport','apple','ball']); // ['airplane','airport']
+```
+
+The dictionary will always be a valid array of strings. Returb all results in the order given in the dictionary, even if they're not always alphabetical. The search should not be case sensitive, but the case of the word should be preserved when it's returned.
+
+For example, "Apple" and "airport" would both return for an input of 'a'. However, they should return as "Apple" and "airport" in their original cases.
+
+Any input that is not a letter should be treated as if it is not there.
+
+### Solution
+
+```js
+function autocomplete(input, dictionary) {
+  // create a regular expression out of the input string
+  // beginning with the input
+  // case insensitive
+  // ! removing anything that is not a letter
+  const regex = new RegExp(`^${input.replace(/[^a-z]/gi, '')}`, 'i');
+
+  // create an array in which to store the solution
+  const solution = [];
+
+  // loop through the dictionary array
+  for(const word of dictionary) {
+    // add the word to the solution's array if the regex matches
+    if(regex.test(word)) {
+      solution.push(word);
+    }
+  }
+
+  // return the solution's array and specifically the first 5 matches
+  return solution.slice(0, 5);
+}
+```
+
+### Notes
+
+The solution can be definitely improved with a `filter` function.
+
+```js
+function autocomplete(input, dictionary) {
+  // regex for the input word, disregarding case and considering only letters
+  const regex = new RegExp(`^${input.replace(/[^a-z]/gi, '')}`, 'i');
+
+  // return the first 5 items of the dictionary array, filtered on the basis of the regex
+  return dictionary
+    .filter(word => regex.test(word))
+    .slice(0, 5);
+}
+```
+
+Much nicer.
+
+### Tags
+
+regex, for of, slice, filter
+
+
+## P23 - ROT13
+
+### Task
+
+```js
+rot13("EBG13 rknzcyr."); // "ROT13 example."
+rot13("This is my first ROT13 excercise!"); // "Guvf vf zl svefg EBG13 rkprepvfr!"
+```
+
+### Notes
+
+ROT13 seems to be a rather straightforward letter-substitution cipher, where each letter is replaced by the 13th letter following it. 13th means that by passing the input string through the cipher twice you have the input string back in its original form. This makes it rather silly, but also useful for messages that are meant to be easily ciphered _and_ deciphered.
+
+```js
+function rot13(str) {
+  // compute the code of the thirtheenth lowercase letter
+  const letterCode = 'a'.charCodeAt() + 13;
+  // return the string where each letter is replaced following the algorithm's instructions
+  return str.replace(/[a-z]/gi, (match) => {
+    // to decide whether to add or remove 13, consider the code of the lower case match vis a vis the code of the 13th lowercase letter
+    const matchCode = match.charCodeAt();
+    const matchLetterCode = match.toLowerCase().charCodeAt();
+    // return the match according to the comparison between codes
+    return (matchLetterCode < letterCode) ? String.fromCharCode(matchCode + 13) : String.fromCharCode(matchCode - 13);
+  });
+}
+```
+
+## P24 Clock in Mirror
+
+### Task
+
+Complete the function `WhatIsTheTime(timeInMirror)`, where timeInMirror is the mirrored time as string.
+
+Return the real time as a string.
+
+Consider hours to be between 1 <= hour < 13. There is no 00:20, but instead 12:20. There is no 13:20, but instead 01:20.
+
+Examples
+
+```text
+05:25 --> 06:35
+
+01:50 --> 10:10
+
+11:58 --> 12:02
+
+12:01 --> 11:59
+```
+
+### Solution
+
+```js
+function WhatIsTheTime(timeInMirror) {
+  // retrieve the hours and minutes in the mirrored clock
+  const [hoursInMirror, minutesInMirror] = timeInMirror
+    // split using the colon
+    .split(':')
+    // return as integers
+    .map(time => Number.parseInt(time));
+
+  // compute the minutes as the difference from the 60 mark, considering the [0-59] range
+  const minutes = (60 - minutesInMirror) % 60;
+  // compute the hours considering that anything greater than 0 minutes account for an additional hour
+  let hours = (minutes > 0) ? (12 - (hoursInMirror - 12 + 1)) : (12 - (hoursInMirror - 12));
+
+  // 12 hours clock
+  if(hours > 12) {
+    hours = hours % 12;
+  }
+
+  // return the 0 padded values
+  return `${hours >= 10 ? hours : `0${hours}`}:${minutes >= 10 ? minutes : `0${minutes}`}`;
+}
+```
+
+### Tags
+
+split, basic math
